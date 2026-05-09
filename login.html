@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - LinkVault</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script>
+        // Init theme immediately to prevent flash
+        const isDark = localStorage.getItem('lv_theme') === 'dark';
+        if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+    </script>
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        .login-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+            z-index: 10;
+        }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .logo-container h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+        .logo-container p {
+            color: rgba(255,255,255,0.8) !important;
+            font-size: 1.1rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="login-body mesh-bg">
+
+<div class="auth-container">
+    <div class="logo-container">
+        <h2 class="mt-2 text-white">LinkVault</h2>
+        <p>Your personal bookmark manager</p>
+    </div>
+
+    <!-- Login Form -->
+    <div class="card glass-panel mb-4" id="login-card">
+        <div class="card-body p-4">
+            <h4 class="text-center mb-4">Welcome back</h4>
+            <form id="login-form">
+                <div class="mb-3">
+                    <label class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="login-email" required placeholder="name@example.com" list="saved-emails" autocomplete="off">
+                    <datalist id="saved-emails"></datalist>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="login-password" required placeholder="Enter password">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-3" id="btn-login">Sign in</button>
+                <div class="text-center">
+                    <span class="text-muted">Don't have an account?</span>
+                    <a href="#" id="show-register" class="text-decoration-none ms-1">Create one</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Form (Hidden by default) -->
+    <div class="card glass-panel mb-4 d-none" id="register-card">
+        <div class="card-body p-4">
+            <h4 class="text-center mb-4">Create account</h4>
+            <form id="register-form">
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="reg-fname" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="reg-lname" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="reg-email" required placeholder="name@example.com">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="reg-password" required minlength="6" placeholder="At least 6 characters">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-3" id="btn-register">Create account</button>
+                <div class="text-center">
+                    <span class="text-muted">Already have an account?</span>
+                    <a href="#" id="show-login" class="text-decoration-none ms-1">Sign in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginCard = document.getElementById('login-card');
+        const registerCard = document.getElementById('register-card');
+        
+        // Populate saved emails datalist
+        const savedEmails = JSON.parse(localStorage.getItem('lv_saved_emails') || '[]');
+        const datalist = document.getElementById('saved-emails');
+        savedEmails.forEach(email => {
+            const option = document.createElement('option');
+            option.value = email;
+            datalist.appendChild(option);
+        });
+
+        document.getElementById('show-register').addEventListener('click', (e) => {
+            e.preventDefault();
+            loginCard.classList.add('d-none');
+            registerCard.classList.remove('d-none');
+        });
+
+        document.getElementById('show-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            registerCard.classList.add('d-none');
+            loginCard.classList.remove('d-none');
+        });
+
+        // Prevent numbers from being entered in name fields
+        const stripNumbers = (e) => {
+            e.target.value = e.target.value.replace(/[0-9]/g, '');
+        };
+        ['reg-fname', 'reg-lname'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('input', stripNumbers);
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            ui.setLoading('btn-login', true);
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await api.post('/auth/login', { email, password });
+                
+                // Assuming standard response with token. If API returns bare string, handle it.
+                let token = '';
+                if (typeof response === 'string') {
+                    token = response;
+                } else if (response && response.token) {
+                    token = response.token;
+                } else {
+                    throw new Error("Invalid token received from server");
+                }
+
+                auth.setToken(token);
+                
+                // Save email for future autocomplete
+                let savedEmails = JSON.parse(localStorage.getItem('lv_saved_emails') || '[]');
+                if (!savedEmails.includes(email)) {
+                    savedEmails.push(email);
+                    localStorage.setItem('lv_saved_emails', JSON.stringify(savedEmails));
+                }
+
+                window.location.href = 'categories.html';
+            } catch (error) {
+                ui.showError(error);
+            } finally {
+                ui.setLoading('btn-login', false, 'Sign in');
+            }
+        });
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            ui.setLoading('btn-register', true);
+            const firstName = document.getElementById('reg-fname').value;
+            const lastName = document.getElementById('reg-lname').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                await api.post('/auth/register', { firstName, lastName, email, password });
+                ui.showToast('Registration successful! Please sign in.', 'success');
+                document.getElementById('show-login').click();
+                document.getElementById('login-email').value = email;
+            } catch (error) {
+                ui.showError(error);
+            } finally {
+                ui.setLoading('btn-register', false, 'Create account');
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark Details - LinkVault</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="navbar-container"></div>
+
+<main class="container py-4">
+    <div class="mb-4">
+        <a href="bookmarks.html" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Bookmarks
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Bookmark Details Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Bookmark Info</h5>
+                    <div id="bm-badges"></div>
+                </div>
+                <div class="card-body" id="bm-details-container">
+                    <!-- Loading details -->
+                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div> Loading...
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="d-flex justify-content-between text-muted small">
+                        <span>Created: <strong id="bm-created">...</strong></span>
+                        <span>Notes: <strong id="bm-note-count">0</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Notes</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Add Note Form -->
+                    <form id="note-form" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="note-content" placeholder="Add a note to this bookmark..." required maxlength="1000">
+                            <button class="btn btn-primary" type="submit" id="btn-save-note">Add Note</button>
+                        </div>
+                    </form>
+
+                    <!-- Notes List -->
+                    <div id="notes-container">
+                        <!-- Loading notes -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/bookmark-details.js"></script>
+</body>
+</html>

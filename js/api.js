@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://linkvaultapi.runasp.net/api';
+const API_BASE_URL = '/api';
 
 class ApiError extends Error {
     constructor(message, status, data) {

@@ -5,5 +5,11 @@
       "destination": "/login.html",
       "permanent": false
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://linkvaultapi.runasp.net/api/:path*"
+    }
   ]
 }
